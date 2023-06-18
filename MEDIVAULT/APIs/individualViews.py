@@ -110,3 +110,28 @@ def refresh_token(request):
         return Response({'message': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def is_authenticated(request):
+    access_token = request.data['accessToken']
+
+    try:
+        # Verify the access token
+        access_token_payload = jwt.decode(access_token, JWT_SECRET_KEY, algorithms=['HS256'])
+
+        # Check if the access token is expired
+        if datetime.utcnow() > datetime.fromtimestamp(access_token_payload['exp']):
+            return Response({'message': 'Access token expired'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response({'message': 'User is authenticated'}, status=status.HTTP_200_OK)
+
+    except jwt.ExpiredSignatureError:
+        return Response({'message': 'Access token expired'}, status=status.HTTP_401_UNAUTHORIZED)
+    except jwt.InvalidTokenError:
+        return Response({'message': 'Invalid access token'}, status=status.HTTP_401_UNAUTHORIZED)
+    except KeyError:
+        return Response({'message': 'Access token not provided'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

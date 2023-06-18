@@ -6,4 +6,5 @@ urlpatterns = [
     path('signup/', individualViews.signup, name='Signup'),
     path('login/', individualViews.login, name='Login'),
     path('refreshToken/', individualViews.refresh_token, name='User'),
+    path('isAuthenticated/', individualViews.is_authenticated, name='Is Authenticated'),
 ]
