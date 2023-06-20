@@ -81,7 +81,7 @@ def login(request):
 
 
 @api_view(['POST'])
-def refresh_token(request):
+def refresh_access_token(request):
     try:
         refresh_token = request.data['refreshToken']
 
