@@ -67,8 +67,6 @@ def login(request):
                     'access_token': access_token
                 }
             }, status=status.HTTP_200_OK)
-
-
         else:
             return Response({'action': "Login", 'message': "Incorrect Password"}, status=status.HTTP_401_UNAUTHORIZED)
 

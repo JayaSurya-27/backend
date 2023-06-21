@@ -8,6 +8,12 @@ class IndividualSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = '__all__'
+
+
 class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = Individual
