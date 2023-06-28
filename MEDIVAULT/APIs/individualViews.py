@@ -64,7 +64,8 @@ def login(request):
                 'message': "Login Successful",
                 'data': {
                     'refresh_token': refresh_token,
-                    'access_token': access_token
+                    'access_token': access_token,
+                    'id': user.id,
                 }
             }, status=status.HTTP_200_OK)
         else:
@@ -133,3 +134,36 @@ def is_authenticated(request):
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(['POST'])
+def add_file(request):
+    if request.method == 'POST':
+        try:
+            serializer = FileSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'action': "Upload File", 'message': "File Uploaded Successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response({'action': "Upload File", 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'action': "Upload File", 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # If the request method is not POST
+    return Response({'error': 'Invalid request method.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_files(request):
+    if request.method == 'GET':
+        try:
+            file_id = request.GET.get('id')
+            file_data = Files.objects.filter(owner=file_id)
+            serializer = GetFileSerializer(file_data, many=True)
+            return Response({'action': 'Get Files', 'message': 'Data Found', 'data': serializer.data},
+                            status=status.HTTP_200_OK)
+        except Files.DoesNotExist:
+            return Response({'action': 'Get Files', 'message': 'No Files Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'action': 'Get Files', 'message': 'Something went wrong'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
