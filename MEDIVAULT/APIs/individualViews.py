@@ -3,10 +3,11 @@ from .serializers import *
 from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+import os
 
 # Set the secret key for JWT token encoding and decoding
 JWT_SECRET_KEY = 'secret'
@@ -167,3 +168,29 @@ def get_files(request):
         except Exception as e:
             return Response({'action': 'Get Files', 'message': 'Something went wrong'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def download_file(request, file_id):
+    try:
+        # Retrieve the file object from the database or file storage
+        file_object = Files.objects.get(id=file_id)
+
+        # Get the file path
+        file_path = os.path.join(settings.MEDIA_ROOT, file_object.file.name)
+
+        # Check if the file exists
+        if os.path.exists(file_path):
+            # Open the file in binary mode
+            with open(file_path, 'rb') as f:
+                # Create the HTTP response with the file content
+                response = HttpResponse(f.read(), content_type='application/octet-stream')
+
+                # Set the response headers for file download
+                response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
+                return response
+        else:
+            raise Http404("File does not exist.")
+
+    except Files.DoesNotExist:
+        raise Http404("File does not exist.")
