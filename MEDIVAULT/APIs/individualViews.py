@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
 
+
 # Set the secret key for JWT token encoding and decoding
 JWT_SECRET_KEY = 'secret'
 
@@ -177,7 +178,7 @@ def download_file(request, file_id):
         file_object = Files.objects.get(id=file_id)
 
         # Get the file path
-        file_path = os.path.join(settings.MEDIA_ROOT, file_object.file.name)
+        file_path = os.path.join( file_object.file.name)
 
         # Check if the file exists
         if os.path.exists(file_path):
@@ -194,3 +195,4 @@ def download_file(request, file_id):
 
     except Files.DoesNotExist:
         raise Http404("File does not exist.")
+
