@@ -31,10 +31,33 @@ class Files(models.Model):
     file = models.FileField(upload_to='files/')
     owner = models.ForeignKey(Individual, on_delete=models.CASCADE)
     date = models.DateTimeField(default=timezone.now)
-    # add uploaded by field
+    uploadedBy = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True)
     tags = ArrayField(models.CharField(max_length=200), blank=True, null=True)
 
     def __str__(self):
         return self.name
 
+
+class FileRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('declined', 'Declined'),
+        ('accepted', 'Accepted'),
+    ]
+
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
+    file = models.FileField(upload_to='fileReq/')
+    name = models.CharField(max_length=200)
+    owner = models.ForeignKey(Individual, on_delete=models.CASCADE)
+
+    date = models.DateTimeField(default=timezone.now)
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True)  #should be changed to cascade
+    status = models.CharField(choices=STATUS_CHOICES, default='pending')
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def owner_name(self):
+        return self.owner.name
 
