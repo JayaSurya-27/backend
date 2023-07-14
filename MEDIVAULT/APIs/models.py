@@ -31,7 +31,7 @@ class Files(models.Model):
     file = models.FileField(upload_to='files/')
     owner = models.ForeignKey(Individual, on_delete=models.CASCADE)
     date = models.DateTimeField(default=timezone.now)
-    uploadedBy = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True)
+    uploadedBy = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
     tags = ArrayField(models.CharField(max_length=200), blank=True, null=True)
 
     def __str__(self):

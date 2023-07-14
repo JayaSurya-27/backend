@@ -171,14 +171,45 @@ def get_files(request):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# @api_view(['GET'])
+# def download_file(request, file_id):
+#     try:
+#         # Retrieve the file object from the database or file storage
+#         file_object = Files.objects.get(id=file_id)
+#
+#         # Get the file path
+#         file_path = os.path.join(file_object.file.name)
+#
+#         # Check if the file exists
+#         if os.path.exists(file_path):
+#             # Open the file in binary mode
+#             with open(file_path, 'rb') as f:
+#                 # Create the HTTP response with the file content
+#                 response = HttpResponse(f.read(), content_type='application/octet-stream')
+#
+#                 # Set the response headers for file download
+#                 response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
+#                 return response
+#         else:
+#             raise Http404("File does not exist.")
+#
+#     except Files.DoesNotExist:
+#         raise Http404("File does not exist.")
+
+
+from django.http import HttpResponse, Http404
+from .models import Files
+import os
+
+
 @api_view(['GET'])
 def download_file(request, file_id):
     try:
-        # Retrieve the file object from the database or file storage
+        # Retrieve the file object from the database
         file_object = Files.objects.get(id=file_id)
 
         # Get the file path
-        file_path = os.path.join( file_object.file.name)
+        file_path = file_object.file.path
 
         # Check if the file exists
         if os.path.exists(file_path):
@@ -188,11 +219,58 @@ def download_file(request, file_id):
                 response = HttpResponse(f.read(), content_type='application/octet-stream')
 
                 # Set the response headers for file download
-                response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
+                file_name = f'{file_object.name}_{file_object.id}{os.path.splitext(file_object.file.name)[1]}'
+                response['Content-Disposition'] = f'attachment; filename="{file_name}"'
                 return response
         else:
             raise Http404("File does not exist.")
 
     except Files.DoesNotExist:
         raise Http404("File does not exist.")
+
+
+# @api_view(['DELETE'])
+# def delete_file(request, file_id):
+#     try:
+#         # Retrieve the file object from the database or file storage
+#         file_object = Files.objects.get(id=file_id)
+#         file_path = os.path.join(file_object.file.name)
+#
+#         # Check if the file exists
+#         if os.path.exists(file_path):
+#
+#             os.remove(file_path)
+#             file_object.delete()
+#             return Response({'action': 'Delete File', 'message': 'File deleted successfully'},
+#                             status=status.HTTP_200_OK)
+#     except Files.DoesNotExist:
+#         raise Http404("File does not exist.")
+
+@api_view(['DELETE'])
+def delete_file(request, file_id):
+    try:
+        # Retrieve the file object from the database
+        file_object = Files.objects.get(id=file_id)
+
+        # Get the file path
+        file_path = file_object.file.path
+
+        # Check if the file exists
+        if os.path.exists(file_path):
+            # Delete the file from storage
+            os.remove(file_path)
+
+            # Delete the file object from the database
+            file_object.delete()
+
+            return Response({'action': 'Delete File', 'message': 'File deleted successfully'},
+                            status=status.HTTP_200_OK)
+        else:
+            raise Http404("File does not exist.")
+
+    except Files.DoesNotExist:
+        raise Http404("File does not exist.")
+
+
+
 
