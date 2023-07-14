@@ -88,19 +88,41 @@ def add_file(request):
     return Response({'error': 'Invalid request method.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+# @api_view(['GET'])
+# def get_files(request):
+#     if request.method == 'GET':
+#         try:
+#             file_id = request.GET.get('id')
+#             file_data = FileRequest.objects.filter(organization=file_id)
+#             serializer = GetFileRequestSerializer(file_data, many=True)
+#             return Response({'action': 'Get Files', 'message': 'Data Found', 'data': serializer.data},
+#                             status=status.HTTP_200_OK)
+#         except Files.DoesNotExist:
+#             return Response({'action': 'Get Files', 'message': 'No Files Found'},
+#                             status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             return Response({'action': 'Get Files', 'message': 'Something went wrong'},
+#                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['GET'])
 def get_files(request):
     if request.method == 'GET':
         try:
             file_id = request.GET.get('id')
-            file_data = FileRequest.objects.filter(organization=file_id)
+            org = get_object_or_404(Organization, id=file_id)
+            file_data = FileRequest.objects.filter(organization=org)
             serializer = GetFileRequestSerializer(file_data, many=True)
             return Response({'action': 'Get Files', 'message': 'Data Found', 'data': serializer.data},
                             status=status.HTTP_200_OK)
+        except Organization.DoesNotExist:
+            return Response({'action': 'Get Files', 'message': 'Organization Not Found'},
+                            status=status.HTTP_404_NOT_FOUND)
         except FileRequest.DoesNotExist:
             return Response({'action': 'Get Files', 'message': 'No Files Found'},
                             status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({'action': 'Get Files', 'message': 'Something went wrong'},
+            return Response({'action': 'Get Files', 'message': str(e)},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
