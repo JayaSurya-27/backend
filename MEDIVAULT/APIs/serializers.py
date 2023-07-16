@@ -38,8 +38,16 @@ class FileRequestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Individual
+        fields = ['firstName', 'lastName']
+
+
 class GetFileRequestSerializer(serializers.ModelSerializer):
+    owner = OwnerSerializer()
+
     class Meta:
         model = FileRequest
-        fields = ['id', 'name', 'file', 'owner.firstName', 'owner.lastName', 'date', 'status']
-        # fields = '__all__'
+        fields = '__all__'
+
