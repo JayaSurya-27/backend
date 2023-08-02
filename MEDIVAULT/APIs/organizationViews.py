@@ -122,4 +122,3 @@ def check_user(request):
         return Response({'exists': False}, status=status.HTTP_404_NOT_FOUND)
 
 
-

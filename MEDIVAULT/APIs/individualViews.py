@@ -171,31 +171,6 @@ def get_files(request):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# @api_view(['GET'])
-# def download_file(request, file_id):
-#     try:
-#         # Retrieve the file object from the database or file storage
-#         file_object = Files.objects.get(id=file_id)
-#
-#         # Get the file path
-#         file_path = os.path.join(file_object.file.name)
-#
-#         # Check if the file exists
-#         if os.path.exists(file_path):
-#             # Open the file in binary mode
-#             with open(file_path, 'rb') as f:
-#                 # Create the HTTP response with the file content
-#                 response = HttpResponse(f.read(), content_type='application/octet-stream')
-#
-#                 # Set the response headers for file download
-#                 response['Content-Disposition'] = f'attachment; filename="{file_object.file.name}"'
-#                 return response
-#         else:
-#             raise Http404("File does not exist.")
-#
-#     except Files.DoesNotExist:
-#         raise Http404("File does not exist.")
-
 
 from django.http import HttpResponse, Http404
 from .models import Files
@@ -229,23 +204,6 @@ def download_file(request, file_id):
         raise Http404("File does not exist.")
 
 
-# @api_view(['DELETE'])
-# def delete_file(request, file_id):
-#     try:
-#         # Retrieve the file object from the database or file storage
-#         file_object = Files.objects.get(id=file_id)
-#         file_path = os.path.join(file_object.file.name)
-#
-#         # Check if the file exists
-#         if os.path.exists(file_path):
-#
-#             os.remove(file_path)
-#             file_object.delete()
-#             return Response({'action': 'Delete File', 'message': 'File deleted successfully'},
-#                             status=status.HTTP_200_OK)
-#     except Files.DoesNotExist:
-#         raise Http404("File does not exist.")
-
 @api_view(['DELETE'])
 def delete_file(request, file_id):
     try:
@@ -270,6 +228,53 @@ def delete_file(request, file_id):
 
     except Files.DoesNotExist:
         raise Http404("File does not exist.")
+
+
+@api_view(['GET'])
+def get_file_requests(request):
+    if request.method == 'GET':
+        try:
+            user_id = request.GET.get('id')
+            user = get_object_or_404(Individual, id=user_id)
+            file_data = FileRequest.objects.filter(owner=user)
+            serializer = GetFileRequestSerializer(file_data, many=True)
+            return Response({'action': 'Get File Requests', 'message': 'Data Found', 'data': serializer.data},
+                            status=status.HTTP_200_OK)
+        except FileRequest.DoesNotExist:
+            return Response({'action': 'Get File Requests', 'message': 'No File Requests Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'action': 'Get File Requests', 'message': 'Something went wrong'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['PUT'])
+def change_status(request):
+    if request.method == 'PUT':
+        try:
+            data = request.data
+            file_request = FileRequest.objects.get(id=data.get('id'))
+            file_request.status = data.get('status')
+            file_request.save()
+
+            # add file to files table
+            if data.get('status') == 'accepted':
+                file = Files.objects.create(
+                    name=file_request.name,
+                    file=file_request.file,
+                    owner=file_request.owner,
+                    uploadedBy=file_request.organization
+                )
+                file.save()
+
+            return Response({'action': 'Change Status', 'message': 'Status Changed Successfully'},
+                            status=status.HTTP_200_OK)
+        except FileRequest.DoesNotExist:
+            return Response({'action': 'Change Status', 'message': 'No File Request Found'},
+                            status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'action': 'Change Status', 'message': 'Something went wrong'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

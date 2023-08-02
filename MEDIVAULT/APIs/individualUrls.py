@@ -11,4 +11,6 @@ urlpatterns = [
     path('getFiles/', individualViews.get_files, name='Get Files'),
     path('downloadFile/<str:file_id>/', individualViews.download_file, name='Download File'),
     path('deleteFile/<str:file_id>/', individualViews.delete_file, name='Delete File'),
+    path('getFileRequests/', individualViews.get_file_requests, name='Get File Requests'),
+    path('changeStatus/', individualViews.change_status, name='Change Status'),
 ]

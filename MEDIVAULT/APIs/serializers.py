@@ -46,7 +46,7 @@ class OwnerSerializer(serializers.ModelSerializer):
 
 class GetFileRequestSerializer(serializers.ModelSerializer):
     owner = OwnerSerializer()
-
+    # org = OrganizationSerializer()
     class Meta:
         model = FileRequest
         fields = '__all__'
